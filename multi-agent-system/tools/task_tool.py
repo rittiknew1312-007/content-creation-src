@@ -15,8 +15,54 @@ class TaskTool(BaseTool):
         elif action == "complete_task":
             return self._complete_task(params)
         else:
-            return {"error": f"Unknown action: {action}"}
+            return {"success": False, "error": f"Unknown action: {action}"}
     
+    def _create_task(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            # Check if title exists
+            if "title" not in params or not params["title"]:
+                return {"success": False, "error": "Task title is required"}
+            
+            task = Task(
+                title=params["title"],
+                description=params.get("description", ""),
+                tags=params.get("tags", [])
+            )
+            if params.get("due_date"):
+                task.due_date = params["due_date"]
+            saved_task = self.memory.save_task(task)
+            return {
+                "success": True,
+                "task": saved_task.model_dump(),
+                "message": f"✅ Task '{saved_task.title}' created successfully"
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _get_tasks(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        tasks = self.memory.get_all_tasks()
+        return {
+            "success": True,
+            "tasks": [t.model_dump() for t in tasks],
+            "count": len(tasks)
+        }
+    
+    def _complete_task(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        task_id = params.get("task_id")
+        if not task_id:
+            return {"success": False, "error": "task_id required"}
+        
+        updated_task = self.memory.update_task(task_id, status=TaskStatus.COMPLETED)
+        if updated_task:
+            return {
+                "success": True,
+                "task": updated_task.model_dump(),
+                "message": f"✅ Task '{updated_task.title}' completed!"
+            }
+        return {"success": False, "error": "Task not found"}
+    
+    def get_actions(self) -> list:
+        return ["create_task", "get_tasks", "complete_task"]
     def _create_task(self, params: Dict[str, Any]) -> Dict[str, Any]:
         try:
             task = Task(
