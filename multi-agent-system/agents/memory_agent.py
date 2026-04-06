@@ -11,6 +11,19 @@ class MemoryAgent(BaseAgent):
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         action = input_data.get("action", "search_notes")
         params = input_data.get("params", {})
+        
+        # Map 'store_info' to 'create_note'
+        if action == "store_info":
+            action = "create_note"
+            message = params.get("message", "")
+            # Extract content from message
+            if "remember" in message.lower():
+                content = message.replace("remember", "").strip()
+            else:
+                content = message
+            params["title"] = "Remembered Info"
+            params["content"] = content
+        
         result = self.notes_tool.execute(action, params)
         return {
             "agent": self.name,
