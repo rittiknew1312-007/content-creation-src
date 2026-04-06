@@ -11,6 +11,23 @@ class SchedulerAgent(BaseAgent):
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         action = input_data.get("action", "get_events")
         params = input_data.get("params", {})
+        
+        # Map 'schedule' action to 'create_event'
+        if action == "schedule":
+            action = "create_event"
+            # Extract event info from message
+            message = params.get("message", "")
+            if "schedule" in message.lower():
+                # Simple extraction for meeting titles
+                if "meeting" in message.lower():
+                    params["title"] = "Team Meeting"
+                else:
+                    params["title"] = "Scheduled Event"
+                # Set default times
+                from datetime import datetime, timedelta
+                params["start_time"] = (datetime.now() + timedelta(days=1)).isoformat()
+                params["end_time"] = (datetime.now() + timedelta(days=1, hours=1)).isoformat()
+        
         result = self.calendar_tool.execute(action, params)
         return {
             "agent": self.name,
