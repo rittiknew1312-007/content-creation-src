@@ -1,1 +1,4 @@
-# multi-agent-system
+Install Requirements
+'''
+pip install -r requirements.txt
+'''
