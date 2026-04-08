@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Innovagen</title>
+<style>
+:root {
+  --bg:#f7f7fb;--bg2:#ffffff;--bg3:#f0eff8;--border:#e2e1f0;
+  --purple:#6c63f5;--pl:#4f46e5;--pd:#ede9fe;
+  --text:#1a1830;--t2:#6b6a8a;--t3:#a09fbf;
+  --green:#16a34a;--coral:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
+#app{display:flex;height:100vh;flex-direction:column;}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-l{display:flex;align-items:center;gap:10px;}
+.hlm{width:30px;height:30px;background:var(--purple);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.hdr-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.3px;}
+.hdr-r{display:flex;align-items:center;gap:6px;}
+.hbtn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--t2);font-size:13px;}
+.body{display:flex;flex:1;overflow:hidden;}
+.sb{width:240px;background:var(--bg2);border-right:1px solid var(--border);padding:14px 12px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;overflow-y:auto;}
+.sb-sec{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;padding:6px 8px 2px;margin-top:4px;}
+.sb-prof{background:var(--bg3);border-radius:12px;padding:14px;border:1.5px solid var(--border);}
+.prof-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.prof-avatar{width:40px;height:40px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0;}
+.prof-info{flex:1;min-width:0;}
+.pname{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pniche{font-size:12px;color:var(--purple);margin-top:1px;}
+.ptags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.ptag{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--pd);color:var(--pl);white-space:nowrap;}
+.sum-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px;}
+.sum-title{font-size:11px;color:var(--t3);text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.sum-row{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:6px;word-break:break-word;}
+.sum-row strong{color:var(--text);}
+.plat{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;font-size:13px;color:var(--t2);border:1.5px solid transparent;}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--purple);}
+.chat{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.msgs{flex:1;overflow-y:auto;padding:20px 28px;display:flex;flex-direction:column;gap:18px;}
+.msgs::-webkit-scrollbar{width:4px;}
+.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.msg{display:flex;flex-direction:column;max-width:72%;animation:fu 0.25s ease;}
+.msg.u{align-self:flex-end;align-items:flex-end;}
+.msg.b{align-self:flex-start;align-items:flex-start;}
+.mhdr{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.mav{width:22px;height:22px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.mlbl{font-size:12px;color:var(--t3);}
+.bub{padding:11px 15px;border-radius:14px;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+.msg.b .bub{background:var(--bg2);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.msg.u .bub{background:var(--purple);border-bottom-right-radius:4px;color:#fff;}
+.err-badge{display:inline-flex;font-size:11px;padding:2px 10px;border-radius:20px;margin-bottom:5px;background:#fef2f2;color:var(--coral);border:1px solid #fecaca;}
+.sug-wrap{padding:0 28px 12px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;}
+.sug-lbl{font-size:12px;color:var(--t3);}
+.sugs{display:flex;flex-wrap:wrap;gap:7px;}
+.sug{padding:7px 13px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--t2);font-size:13px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.sug:hover{border-color:var(--purple);color:var(--purple);background:var(--pd);}
+.ibar{padding:10px 28px 14px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;}
+.iwrap{flex:1;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;display:flex;align-items:flex-end;padding:9px 13px;gap:8px;transition:border-color 0.2s;}
+.iwrap:focus-within{border-color:var(--purple);}
+.iwrap textarea{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:inherit;resize:none;line-height:1.5;max-height:100px;}
+.iwrap textarea::placeholder{color:var(--t3);}
+.sbtn{width:36px;height:36px;background:var(--purple);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;}
+.sbtn:hover{background:var(--pl);}
+.sbtn:disabled{background:var(--border);cursor:not-allowed;}
+.sbtn svg{width:15px;height:15px;fill:#fff;}
+.trace{border-top:1px solid var(--border);background:var(--bg2);padding:10px 28px 14px;max-height:210px;overflow:auto;flex-shrink:0;}
+.trace-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.badge{display:inline-flex;font-size:11px;padding:4px 10px;border-radius:20px;background:var(--bg3);color:var(--t2);border:1px solid var(--border);}
+.badge.ok{background:#ecfdf5;color:var(--green);border-color:#bbf7d0;}
+.badge.err{background:#fef2f2;color:var(--coral);border-color:#fecaca;}
+.draft-pane{border-top:1px solid var(--border);background:#fcfbff;padding:10px 28px 14px;max-height:280px;overflow:auto;flex-shrink:0;}
+.draft-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.draft-card{font-size:12px;color:var(--t2);padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);margin-bottom:10px;}
+.draft-card:last-child{margin-bottom:0;}
+.draft-card strong{display:block;color:var(--text);font-size:12px;margin-bottom:6px;}
+.draft-card pre{white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.55;color:var(--text);}
+.draft-empty{font-size:12px;color:var(--t3);}
+.trace-item{font-size:12px;color:var(--t2);padding:8px 0;border-bottom:1px solid var(--border);white-space:pre-wrap;word-break:break-word;}
+.trace-item:last-child{border-bottom:none;}
+.trace-item strong{display:block;color:var(--text);font-size:12px;margin-bottom:2px;}
+.trace-item.muted{color:var(--t3);}
+.tdots{display:flex;gap:4px;align-items:center;padding:3px 0;}
+.tdots span{width:6px;height:6px;background:var(--t3);border-radius:50%;animation:bounce 1s infinite;}
+.tdots span:nth-child(2){animation-delay:0.15s;}
+.tdots span:nth-child(3){animation-delay:0.3s;}
+@keyframes bounce{0%,80%,100%{transform:scale(1)}40%{transform:scale(1.5)}}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:960px){.body{flex-direction:column}.sb{width:100%;border-right:none;border-bottom:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="hlm" id="hlm"></div>
+      <span class="hdr-name">Innovagen</span>
+    </div>
+    <div class="hdr-r">
+      <div class="hbtn">Guided chat workflow</div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="sb">
+      <div class="sb-prof">
+        <div class="prof-top">
+          <div class="prof-avatar" id="prof-avatar">?</div>
+          <div class="prof-info">
+            <div class="pname" id="prof-name">Waiting for details</div>
+            <div class="pniche" id="prof-niche">Guided capture mode</div>
+          </div>
+        </div>
+        <div class="ptags" id="prof-tags"></div>
+      </div>
+      <div class="sb-sec">Platform</div>
+      <div class="plat"><div class="pdot"></div><span id="plat-val">Not chosen yet</span></div>
+      <div class="sum-card">
+        <div class="sum-title">Campaign</div>
+        <div class="sum-row"><strong>Topic:</strong> <span id="sum-topic">-</span></div>
+        <div class="sum-row"><strong>Objective:</strong> <span id="sum-objective">-</span></div>
+        <div class="sum-row"><strong>Cadence:</strong> <span id="sum-cadence">-</span></div>
+        <div class="sum-row"><strong>Scheduled:</strong> <span id="sum-scheduled">-</span></div>
+        <div class="sum-row"><strong>Email:</strong> <span id="sum-email">-</span></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-title">Brand Context</div>
+        <div class="sum-row"><strong>Bio:</strong> <span id="sum-bio">-</span></div>
+        <div class="sum-row"><strong>Avoid:</strong> <span id="sum-avoid">-</span></div>
+      </div>
+    </div>
+    <div class="chat">
+      <div class="msgs" id="msgs"></div>
+      <div class="sug-wrap" id="sugwrap">
+        <div class="sug-lbl">Quick answers</div>
+        <div class="sugs" id="sugs"></div>
+      </div>
+      <div class="ibar">
+        <div class="iwrap">
+          <textarea id="uinput" rows="1" placeholder="Type your answer..." onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+        </div>
+        <button class="sbtn" id="sendbtn" onclick="sendMsg()">
+          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
+      </div>
+      <div class="draft-pane">
+        <div class="draft-head">
+          <strong style="font-size:13px;">Generated Content</strong>
+          <span class="badge" id="draftStatusBadge">not available</span>
+        </div>
+        <div id="draftContent" class="draft-empty">Run a workflow to see the generated draft here.</div>
+      </div>
+      <div class="trace">
+        <div class="trace-head">
+          <strong style="font-size:13px;">Workflow Status</strong>
+          <span class="badge" id="statusBadge">idle</span>
+        </div>
+        <div class="trace-item" id="workflowMeta">No workflow run yet.</div>
+        <div id="traceList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function lsvWhite(s){return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 40 40" fill="none"><rect x="17" y="7" width="6" height="26" rx="3" fill="white"/><rect x="7" y="17" width="26" height="6" rx="3" fill="white"/><circle cx="10" cy="10" r="3" fill="white" opacity="0.4"/><circle cx="30" cy="10" r="3" fill="white" opacity="0.4"/><circle cx="10" cy="30" r="3" fill="white" opacity="0.4"/><circle cx="30" cy="30" r="3" fill="white" opacity="0.4"/></svg>';}
+document.getElementById('hlm').innerHTML=lsvWhite(16);
+
+var state={creator_profile:{name:'',niche:'',tone:'',platforms:[],goal:''},brand_kit:{bio:'',avoid:''},campaign:{topic:'',objective:'',target_platform:'',posting_cadence:'weekly',scheduled_for:'',reminder_email:'',notes:''}};
+var steps=[
+ {key:'campaign.topic',q:'Hey! I am Innovagen, your AI creative director.\n\nWhat do you want to create content about?'},
+ {key:'campaign.objective',q:'What is the goal of this content?',opts:['education and engagement','brand awareness','audience growth','lead generation']},
+ {key:'campaign.target_platform',q:'Which platform should this campaign target?',opts:['linkedin','instagram','youtube','twitter_x','tiktok']},
+ {key:'creator_profile.tone',q:'What tone should the content use?',opts:['Educational','Conversational','Bold','Playful','Professional']},
+ {key:'brand_kit.avoid',q:'Any brand constraints or things to avoid?\nIf none, type "none".'},
+ {key:'campaign.scheduled_for',q:'What exact scheduled time should I use?\nSend it in ISO format, for example:\n2026-04-09T10:00:00+05:30'},
+ {key:'campaign.reminder_email',q:'Which email address should receive the confirmation email?'},
+ {key:'campaign.notes',q:'Any additional notes or CTA preferences?\nIf none, type "none".'}
+];
+var idx=0,running=false;
+var workflowTimer=null, workflowStartedAt=0;
+
+var AUTHOR_LABELS={
+ campaign_manager_agent:'Setting up campaign',
+ research_agent:'Researching topic',
+ content_creator_agent:'Generating draft',
+ review_agent:'Reviewing draft',
+ calendar_agent:'Scheduling and notifying',
+ calendar_procedural:'Scheduling and notifying'
+};
+
+function setNested(obj,path,val){var p=path.split('.'),r=obj;for(var i=0;i<p.length-1;i++)r=r[p[i]];r[p[p.length-1]]=val;if(path==='campaign.target_platform')obj.creator_profile.platforms=[val];}
+function botMsg(text,isErr){
+ var c=document.getElementById('msgs');var d=document.createElement('div');d.className='msg b';
+ d.innerHTML='<div class="mhdr"><div class="mav">'+lsvWhite(11)+'</div><span class="mlbl">Innovagen</span></div>'+(isErr?'<div class="err-badge">Error</div>':'')+'<div class="bub">'+text+'</div>';
+ c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function userMsg(text){
+ var c=document.getElementById('msgs');var d=document.createElement('div');d.className='msg u';
+ d.innerHTML='<div class="bub">'+text+'</div>';c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function setStatus(label,cls){var e=document.getElementById('statusBadge');e.textContent=label;e.className='badge'+(cls?' '+cls:'');}
+function escapeHtml(text){
+ return String(text||'')
+   .replace(/&/g,'&amp;')
+   .replace(/</g,'&lt;')
+   .replace(/>/g,'&gt;');
+}
+function toTitle(text){
+ return String(text||'').replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+}
+function inferFriendlyMessage(evt){
+ var author=evt&&evt.author?String(evt.author):'';
+ var text=evt&&evt.text?String(evt.text):'';
+ var lower=text.toLowerCase();
+ if(lower.includes('created with id')) return 'Campaign created';
+ if(lower.includes('research brief has been successfully created')) return 'Research completed';
+ if(lower.includes('draft has been created')) return 'Draft created';
+ if(lower.includes('approved')) return 'Content approved';
+ if(lower.includes('schedule job')&&lower.includes('created')) return 'Scheduling started';
+ if(lower.includes('send')&&lower.includes('email')) return 'Sending confirmation email';
+ if(lower.includes('calendar event')) return 'Calendar event updated';
+ if(lower.includes('scheduled')) return 'Post scheduled';
+ if(AUTHOR_LABELS[author]) return AUTHOR_LABELS[author];
+ if(evt&&evt.stage) return toTitle(evt.stage);
+ return 'Workflow update';
+}
+function summarizeEvents(events){
+ var milestones=[];
+ for(var i=0;i<events.length;i++){
+   var evt=events[i]||{};
+   var label=inferFriendlyMessage(evt);
+   if(!label) continue;
+   var detail=(evt.text||'').trim();
+   if(milestones.length && milestones[milestones.length-1].label===label){
+     if(detail) milestones[milestones.length-1].detail=detail;
+     continue;
+   }
+   milestones.push({label:label,detail:detail});
+ }
+ return milestones;
+}
+function renderTrace(data){
+ var trace=document.getElementById('traceList');
+ trace.innerHTML='';
+ var events=Array.isArray(data&&data.events)?data.events:[];
+ var milestones=summarizeEvents(events);
+ if(!milestones.length){
+   var empty=document.createElement('div');
+   empty.className='trace-item muted';
+   empty.textContent='No workflow milestones captured yet.';
+   trace.appendChild(empty);
+   return;
+ }
+ for(var i=0;i<milestones.length;i++){
+   var item=document.createElement('div');
+   item.className='trace-item';
+   var detail='';
+   if(milestones[i].detail){
+     if(milestones[i].detail.length>180) detail=milestones[i].detail.slice(0,177)+'...';
+     else detail=milestones[i].detail;
+   }
+   item.innerHTML='<strong>'+escapeHtml(milestones[i].label)+'</strong>'+(detail?('<span>'+escapeHtml(detail)+'</span>'):'');
+   trace.appendChild(item);
+  }
+}
+function renderGeneratedContent(data){
+ var content=data&&data.generated_content?data.generated_content:null;
+ var root=document.getElementById('draftContent');
+ var badge=document.getElementById('draftStatusBadge');
+ if(!content){
+   badge.textContent='not available';
+   badge.className='badge';
+   root.className='draft-empty';
+   root.textContent='Run a workflow to see the generated draft here.';
+   return;
+ }
+ badge.textContent=String(content.draft_status||'available').replace(/_/g,' ');
+ badge.className='badge ok';
+ root.className='';
+ var sections=[];
+ if(content.caption) sections.push('<div class="draft-card"><strong>Caption</strong><pre>'+escapeHtml(content.caption)+'</pre></div>');
+ if(content.script) sections.push('<div class="draft-card"><strong>Script</strong><pre>'+escapeHtml(content.script)+'</pre></div>');
+ if(content.visual_prompt) sections.push('<div class="draft-card"><strong>Visual Prompt</strong><pre>'+escapeHtml(content.visual_prompt)+'</pre></div>');
+ if(content.platform_notes) sections.push('<div class="draft-card"><strong>Platform Notes</strong><pre>'+escapeHtml(content.platform_notes)+'</pre></div>');
+ root.innerHTML=sections.length?sections.join(''):'<div class="draft-empty">Draft fields were empty for this run.</div>';
+}
+function startWorkflowTimer(){
+ workflowStartedAt=Date.now();
+ stopWorkflowTimer();
+ workflowTimer=setInterval(function(){
+   var sec=Math.round((Date.now()-workflowStartedAt)/1000);
+   var meta='Running workflow... '+sec+'s elapsed.';
+   if(sec>20) meta+=' Waiting on model or tool response.';
+   if(sec>60) meta+=' This is taking longer than usual.';
+   document.getElementById('workflowMeta').textContent=meta;
+ },1000);
+}
+function stopWorkflowTimer(){ if(workflowTimer){clearInterval(workflowTimer);workflowTimer=null;} }
+function renderSummary(){
+ document.getElementById('prof-avatar').textContent=(state.creator_profile.name||'?').slice(0,1).toUpperCase();
+ document.getElementById('prof-name').textContent='Workflow capture';
+ document.getElementById('prof-niche').textContent=state.creator_profile.tone||'Guided capture mode';
+ document.getElementById('prof-tags').innerHTML=
+   (state.creator_profile.tone?'<span class="ptag">'+state.creator_profile.tone+'</span>':'')+
+   (state.campaign.target_platform?'<span class="ptag">'+state.campaign.target_platform+'</span>':'');
+ document.getElementById('plat-val').textContent=state.campaign.target_platform||'Not chosen yet';
+ document.getElementById('sum-topic').textContent=state.campaign.topic||'-';
+ document.getElementById('sum-objective').textContent=state.campaign.objective||'-';
+ document.getElementById('sum-cadence').textContent=state.campaign.posting_cadence||'-';
+ document.getElementById('sum-scheduled').textContent=state.campaign.scheduled_for||'-';
+ document.getElementById('sum-email').textContent=state.campaign.reminder_email||'-';
+ document.getElementById('sum-bio').textContent=state.campaign.notes||'-';
+ document.getElementById('sum-avoid').textContent=state.brand_kit.avoid||'-';
+}
+function renderChoices(){
+ var s=document.getElementById('sugs');s.innerHTML='';
+ var step=steps[idx]; if(!step||!step.opts){document.getElementById('sugwrap').style.display='none';return;}
+ document.getElementById('sugwrap').style.display='flex';
+ for(var i=0;i<step.opts.length;i++){
+   var d=document.createElement('div');d.className='sug';d.textContent=step.opts[i];
+   d.onclick=(function(v){return function(){submitAnswer(v);};})(step.opts[i]);s.appendChild(d);
+ }
+}
+function askStep(){ if(idx>=steps.length){runWorkflow();return;} botMsg(steps[idx].q); renderChoices(); }
+function submitAnswer(v){
+ if(running)return; v=(v||'').trim(); if(!v)return;
+ userMsg(v); setNested(state,steps[idx].key,v==='none'?'':v); renderSummary(); idx++; document.getElementById('uinput').value=''; document.getElementById('uinput').style.height='auto'; setTimeout(askStep,180);
+}
+function sendMsg(){submitAnswer(document.getElementById('uinput').value);}
+async function runWorkflow(){
+ running=true; document.getElementById('sugwrap').style.display='none'; document.getElementById('sendbtn').disabled=true; document.getElementById('uinput').disabled=true;
+ setStatus('running',''); document.getElementById('workflowMeta').textContent='Submitting workflow...'; startWorkflowTimer(); botMsg('I have everything I need. Starting the workflow now.');
+ try{
+   var resp=await fetch('/workflows/content-campaign',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
+   var raw=await resp.text(),data;
+   try{data=raw?JSON.parse(raw):{};}catch(_){data={status:'error',error:raw||('HTTP '+resp.status)};}
+   stopWorkflowTimer();
+   if(resp.ok&&data.status==='ok'){setStatus('completed','ok');document.getElementById('workflowMeta').textContent=(data.session_id?('session: '+data.session_id+' • '):'')+(data.last_stage?('last stage: '+data.last_stage+' • '):'')+(data.elapsed_seconds?('elapsed: '+data.elapsed_seconds+'s'):'Workflow completed');renderGeneratedContent(data);botMsg(data.response||'Workflow completed.');}
+   else{setStatus('failed','err');document.getElementById('workflowMeta').textContent=(data.session_id?('session: '+data.session_id+' • '):'')+(data.last_stage?('last stage: '+data.last_stage+' • '):'')+(data.elapsed_seconds?('elapsed: '+data.elapsed_seconds+'s'):'Workflow failed');renderGeneratedContent(data);botMsg(data.error||raw||('HTTP '+resp.status),true);}
+   renderTrace(data);
+ }catch(err){stopWorkflowTimer();setStatus('failed','err');document.getElementById('workflowMeta').textContent='Request failed';renderGeneratedContent(null);botMsg(String(err),true);}
+ running=false;
+}
+renderSummary();
+askStep();
+</script>
+</body>
+</html>

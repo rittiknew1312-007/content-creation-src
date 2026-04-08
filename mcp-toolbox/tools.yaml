@@ -1,0 +1,525 @@
+sources:
+  content-ops-db:
+    type: alloydb-postgres
+    project: ${GOOGLE_CLOUD_PROJECT}
+    region: ${GOOGLE_CLOUD_LOCATION:us-central1}
+    cluster: ${ALLOYDB_CLUSTER_ID:my-alloydb-cluster}
+    instance: ${ALLOYDB_INSTANCE_ID:my-primary-inst}
+    database: ${DB_NAME:content_ops}
+    user: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    ipType: private
+
+tools:
+  get_brand_guidelines:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve the active brand guideline record for a creator.
+    parameters:
+      - name: creator_id
+        type: string
+        description: UUID of the creator.
+    statement: |
+      SELECT
+        guideline_id,
+        brand_name,
+        tone_summary,
+        compliance_rules,
+        preferred_ctas,
+        disallowed_terms,
+        created_at,
+        updated_at
+      FROM brand_guidelines
+      WHERE creator_id = CAST($1 AS UUID)
+      ORDER BY updated_at DESC
+      LIMIT 1;
+
+  get_campaign_context:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve campaign context needed by the orchestrator or specialist agents.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+    statement: |
+      SELECT
+        c.campaign_id,
+        c.creator_id,
+        c.title,
+        c.topic,
+        c.objective,
+        c.target_platform,
+        c.posting_cadence,
+        c.source_image_url,
+        c.source_image_gcs_uri,
+        c.status,
+        c.orchestrator_notes,
+        c.created_at,
+        c.updated_at
+      FROM campaigns c
+      WHERE c.campaign_id = CAST($1 AS UUID);
+
+  list_recent_campaigns_for_creator:
+    kind: postgres-sql
+    source: content-ops-db
+    description: List the creator's most recent campaigns for memory and continuity.
+    parameters:
+      - name: creator_id
+        type: string
+        description: UUID of the creator.
+    statement: |
+      SELECT
+        campaign_id,
+        title,
+        topic,
+        target_platform,
+        posting_cadence,
+        status,
+        created_at
+      FROM campaigns
+      WHERE creator_id = CAST($1 AS UUID)
+      ORDER BY created_at DESC
+      LIMIT 10;
+
+  get_latest_research_brief:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve the latest research brief for a campaign.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+    statement: |
+      SELECT
+        brief_id,
+        trend_summary,
+        audience_insights,
+        creative_angles,
+        hook_suggestions,
+        image_analysis,
+        created_at
+      FROM research_briefs
+      WHERE campaign_id = CAST($1 AS UUID)
+      ORDER BY created_at DESC
+      LIMIT 1;
+
+  list_drafts_pending_review:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve drafts that still require review.
+    statement: |
+      SELECT
+        d.draft_id,
+        d.campaign_id,
+        d.draft_version,
+        d.caption,
+        d.script,
+        d.visual_prompt,
+        d.platform_notes,
+        d.created_at
+      FROM drafts d
+      WHERE d.draft_status = 'pending_review'
+      ORDER BY d.created_at ASC
+      LIMIT 20;
+
+  get_latest_draft_for_campaign:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve the latest draft for a campaign.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+    statement: |
+      SELECT
+        draft_id,
+        draft_version,
+        caption,
+        script,
+        visual_prompt,
+        platform_notes,
+        draft_status,
+        created_at
+      FROM drafts
+      WHERE campaign_id = CAST($1 AS UUID)
+      ORDER BY draft_version DESC, created_at DESC
+      LIMIT 1;
+
+  list_approved_unscheduled_content:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve approved drafts that have not yet been scheduled.
+    statement: |
+      SELECT
+        d.draft_id,
+        d.campaign_id,
+        c.creator_id,
+        c.target_platform,
+        c.posting_cadence,
+        d.caption,
+        d.script,
+        d.visual_prompt,
+        d.created_at
+      FROM drafts d
+      JOIN campaigns c ON c.campaign_id = d.campaign_id
+      WHERE d.draft_status = 'approved'
+        AND NOT EXISTS (
+          SELECT 1
+          FROM schedule_jobs s
+          WHERE s.draft_id = d.draft_id
+        )
+      ORDER BY d.created_at ASC
+      LIMIT 20;
+
+  list_schedule_queue:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Retrieve schedule jobs that are queued or scheduled.
+    statement: |
+      SELECT
+        schedule_job_id,
+        campaign_id,
+        draft_id,
+        scheduled_for,
+        channel,
+        calendar_event_id,
+        reminder_email,
+        schedule_status,
+        created_at
+      FROM schedule_jobs
+      WHERE schedule_status IN ('queued', 'scheduled')
+      ORDER BY scheduled_for ASC
+      LIMIT 20;
+
+  create_campaign:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Create a new campaign record for a creator workflow.
+    parameters:
+      - name: creator_id
+        type: string
+        description: UUID of the creator.
+      - name: title
+        type: string
+        description: Campaign title.
+      - name: topic
+        type: string
+        description: Topic or theme for the campaign.
+      - name: objective
+        type: string
+        description: Business or content objective.
+      - name: target_platform
+        type: string
+        description: Target platform for the content.
+      - name: posting_cadence
+        type: string
+        description: Requested posting cadence.
+      - name: source_image_url
+        type: string
+        description: Public image URL if available.
+      - name: source_image_gcs_uri
+        type: string
+        description: GCS URI for the uploaded source asset if available.
+      - name: orchestrator_notes
+        type: string
+        description: Notes captured by the orchestrator.
+    statement: |
+      INSERT INTO campaigns (
+        creator_id,
+        title,
+        topic,
+        objective,
+        target_platform,
+        posting_cadence,
+        source_image_url,
+        source_image_gcs_uri,
+        orchestrator_notes
+      )
+      VALUES (
+        CAST($1 AS UUID),
+        $2,
+        $3,
+        NULLIF($4, ''),
+        $5,
+        NULLIF($6, ''),
+        NULLIF($7, ''),
+        NULLIF($8, ''),
+        NULLIF($9, '')
+      )
+      RETURNING campaign_id::text AS campaign_id, status, created_at, updated_at;
+
+  update_campaign_status:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Update the campaign workflow status.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+      - name: status
+        type: string
+        description: New campaign status.
+      - name: orchestrator_notes
+        type: string
+        description: Latest orchestrator notes.
+    statement: |
+      UPDATE campaigns
+      SET
+        status = $2,
+        orchestrator_notes = COALESCE(NULLIF($3, ''), orchestrator_notes),
+        updated_at = NOW()
+      WHERE campaign_id = CAST($1 AS UUID)
+      RETURNING campaign_id::text AS campaign_id, status, orchestrator_notes, updated_at;
+
+  create_research_brief:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Persist the latest research brief for a campaign.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+      - name: trend_summary
+        type: string
+        description: Summary of trends and positioning.
+      - name: audience_insights
+        type: string
+        description: Audience insights from research.
+      - name: creative_angles
+        type: string
+        description: Creative directions or narrative angles.
+      - name: hook_suggestions
+        type: string
+        description: Hook suggestions for the creator agent.
+      - name: image_analysis
+        type: string
+        description: Image analysis output if source media was provided.
+    statement: |
+      INSERT INTO research_briefs (
+        campaign_id,
+        trend_summary,
+        audience_insights,
+        creative_angles,
+        hook_suggestions,
+        image_analysis
+      )
+      VALUES (
+        CAST($1 AS UUID),
+        $2,
+        NULLIF($3, ''),
+        NULLIF($4, ''),
+        NULLIF($5, ''),
+        NULLIF($6, '')
+      )
+      RETURNING brief_id::text AS brief_id, campaign_id::text AS campaign_id, created_at, updated_at;
+
+  create_draft:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Create a new draft version for a campaign.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+      - name: brief_id
+        type: string
+        description: UUID of the research brief.
+      - name: caption
+        type: string
+        description: Draft caption.
+      - name: script
+        type: string
+        description: Draft script.
+      - name: visual_prompt
+        type: string
+        description: Prompt for generated visuals.
+      - name: platform_notes
+        type: string
+        description: Platform-specific notes or formatting instructions.
+    statement: |
+      INSERT INTO drafts (
+        campaign_id,
+        brief_id,
+        draft_version,
+        caption,
+        script,
+        visual_prompt,
+        platform_notes
+      )
+      VALUES (
+        CAST($1 AS UUID),
+        CAST(NULLIF($2, '') AS UUID),
+        COALESCE(
+          (SELECT MAX(draft_version) + 1 FROM drafts WHERE campaign_id = CAST($1 AS UUID)),
+          1
+        ),
+        NULLIF($3, ''),
+        NULLIF($4, ''),
+        NULLIF($5, ''),
+        NULLIF($6, '')
+      )
+      RETURNING draft_id::text AS draft_id, campaign_id::text AS campaign_id, draft_version, draft_status, created_at, updated_at;
+
+  update_draft_status:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Update the review status for a draft.
+    parameters:
+      - name: draft_id
+        type: string
+        description: UUID of the draft.
+      - name: draft_status
+        type: string
+        description: New draft status.
+    statement: |
+      UPDATE drafts
+      SET
+        draft_status = $2,
+        updated_at = NOW()
+      WHERE draft_id = CAST($1 AS UUID)
+      RETURNING draft_id::text AS draft_id, campaign_id::text AS campaign_id, draft_version, draft_status, updated_at;
+
+  create_review_result:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Persist review output for a draft.
+    parameters:
+      - name: draft_id
+        type: string
+        description: UUID of the draft.
+      - name: approved
+        type: string
+        description: true or false.
+      - name: risk_level
+        type: string
+        description: low, medium, or high.
+      - name: issues_json
+        type: string
+        description: JSON array of issues.
+      - name: required_changes_json
+        type: string
+        description: JSON array of required changes.
+      - name: review_notes
+        type: string
+        description: Human-readable review notes.
+    statement: |
+      INSERT INTO review_results (
+        draft_id,
+        approved,
+        risk_level,
+        issues,
+        required_changes,
+        review_notes
+      )
+      VALUES (
+        CAST($1 AS UUID),
+        CAST($2 AS BOOLEAN),
+        $3,
+        COALESCE(NULLIF($4, '')::jsonb, '[]'::jsonb),
+        COALESCE(NULLIF($5, '')::jsonb, '[]'::jsonb),
+        NULLIF($6, '')
+      )
+      RETURNING review_id::text AS review_id, draft_id::text AS draft_id, approved, risk_level, created_at, updated_at;
+
+  create_schedule_job:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Create a schedule job for an approved draft.
+    parameters:
+      - name: campaign_id
+        type: string
+        description: UUID of the campaign.
+      - name: draft_id
+        type: string
+        description: UUID of the approved draft.
+      - name: scheduled_for
+        type: string
+        description: Target scheduled time in ISO-8601 format.
+      - name: channel
+        type: string
+        description: Channel or platform identifier.
+      - name: reminder_email
+        type: string
+        description: Email address to notify.
+    statement: |
+      INSERT INTO schedule_jobs (
+        campaign_id,
+        draft_id,
+        scheduled_for,
+        channel,
+        reminder_email
+      )
+      VALUES (
+        CAST($1 AS UUID),
+        CAST($2 AS UUID),
+        CAST($3 AS TIMESTAMPTZ),
+        $4,
+        NULLIF($5, '')
+      )
+      RETURNING schedule_job_id::text AS schedule_job_id, schedule_status, scheduled_for, created_at, updated_at;
+
+  update_schedule_job:
+    kind: postgres-sql
+    source: content-ops-db
+    description: Persist Google Calendar event identifiers and status changes for a schedule job.
+    parameters:
+      - name: schedule_job_id
+        type: string
+        description: UUID of the schedule job.
+      - name: schedule_status
+        type: string
+        description: queued, scheduled, sent, or failed.
+      - name: calendar_event_id
+        type: string
+        description: External Google Calendar event identifier.
+    statement: |
+      UPDATE schedule_jobs
+      SET
+        schedule_status = $2,
+        calendar_event_id = COALESCE(NULLIF($3, ''), calendar_event_id),
+        updated_at = NOW()
+      WHERE schedule_job_id = CAST($1 AS UUID)
+      RETURNING schedule_job_id::text AS schedule_job_id, schedule_status, calendar_event_id, updated_at;
+
+toolsets:
+  orchestrator_toolset:
+    - get_campaign_context
+    - list_recent_campaigns_for_creator
+    - get_latest_research_brief
+    - get_latest_draft_for_campaign
+    - get_brand_guidelines
+    - create_campaign
+    - update_campaign_status
+
+  research_toolset:
+    - get_campaign_context
+    - list_recent_campaigns_for_creator
+    - get_brand_guidelines
+    - create_research_brief
+
+  content_creator_toolset:
+    - get_campaign_context
+    - list_recent_campaigns_for_creator
+    - get_latest_research_brief
+    - get_brand_guidelines
+    - create_draft
+
+  review_toolset:
+    - get_campaign_context
+    - list_recent_campaigns_for_creator
+    - get_latest_draft_for_campaign
+    - list_drafts_pending_review
+    - get_brand_guidelines
+    - create_draft
+    - update_draft_status
+    - create_review_result
+    - update_campaign_status
+
+  calendar_toolset:
+    - list_approved_unscheduled_content
+    - list_schedule_queue
+    - get_campaign_context
+    - create_schedule_job
+    - update_schedule_job
+    - update_campaign_status

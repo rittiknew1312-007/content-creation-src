@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Innovagen Agent Collaboration Workflow</title>
+  <desc id="desc">Architecture flow showing guided chat input, campaign manager, research, creator and reviewer collaboration loop, then procedural scheduling with calendar and Gmail.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f7fb; }
+      .panel { fill: #ffffff; stroke: #e2e1f0; stroke-width: 2; rx: 20; ry: 20; }
+      .accent { fill: #ede9fe; stroke: #6c63f5; stroke-width: 2; rx: 20; ry: 20; }
+      .decision { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+      .text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #1a1830; font-size: 24px; font-weight: 600; }
+      .sub { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #6b6a8a; font-size: 18px; font-weight: 500; }
+      .small { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #4f46e5; font-size: 18px; font-weight: 700; }
+      .line { stroke: #6c63f5; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .line-soft { stroke: #94a3b8; stroke-width: 4; fill: none; marker-end: url(#arrowSoft); }
+      .loop { stroke: #dc2626; stroke-width: 4; fill: none; marker-end: url(#arrowRed); }
+      .label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #1a1830; font-size: 20px; font-weight: 700; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#6c63f5"/>
+    </marker>
+    <marker id="arrowSoft" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="980"/>
+  <text x="800" y="60" text-anchor="middle" class="text" style="font-size:34px;">Innovagen Agent Collaboration Workflow</text>
+  <text x="800" y="96" text-anchor="middle" class="sub">Guided chat to agentic content generation, review loop, and procedural scheduling</text>
+
+  <rect class="accent" x="110" y="140" width="260" height="90"/>
+  <text x="240" y="178" text-anchor="middle" class="text">Guided Chat UI</text>
+  <text x="240" y="208" text-anchor="middle" class="sub">Collects topic, tone, timing, email</text>
+
+  <rect class="accent" x="110" y="300" width="260" height="90"/>
+  <text x="240" y="338" text-anchor="middle" class="text">Content Ops API</text>
+  <text x="240" y="368" text-anchor="middle" class="sub">Builds workflow request</text>
+
+  <rect class="panel" x="470" y="120" width="280" height="90"/>
+  <text x="610" y="158" text-anchor="middle" class="text">Campaign Manager</text>
+  <text x="610" y="188" text-anchor="middle" class="sub">Creates campaign state</text>
+
+  <rect class="panel" x="470" y="270" width="280" height="90"/>
+  <text x="610" y="308" text-anchor="middle" class="text">Research Agent</text>
+  <text x="610" y="338" text-anchor="middle" class="sub">Creates concise brief</text>
+
+  <rect class="panel" x="470" y="430" width="280" height="90"/>
+  <text x="610" y="468" text-anchor="middle" class="text">Content Creator</text>
+  <text x="610" y="498" text-anchor="middle" class="sub">Generates draft</text>
+
+  <rect class="panel" x="940" y="430" width="280" height="90"/>
+  <text x="1080" y="468" text-anchor="middle" class="text">Review Agent</text>
+  <text x="1080" y="498" text-anchor="middle" class="sub">Approves or requests changes</text>
+
+  <polygon class="decision" points="1080,590 1210,670 1080,750 950,670"/>
+  <text x="1080" y="660" text-anchor="middle" class="text">Approved?</text>
+  <text x="1080" y="690" text-anchor="middle" class="sub">Quality + brand fit</text>
+
+  <rect class="accent" x="1290" y="615" width="220" height="90"/>
+  <text x="1400" y="653" text-anchor="middle" class="text">Procedural</text>
+  <text x="1400" y="683" text-anchor="middle" class="sub">Scheduler</text>
+
+  <rect class="panel" x="1260" y="790" width="250" height="70"/>
+  <text x="1385" y="833" text-anchor="middle" class="text">Calendar + Gmail</text>
+
+  <rect class="panel" x="790" y="120" width="270" height="120"/>
+  <text x="925" y="158" text-anchor="middle" class="text">AlloyDB + Toolbox</text>
+  <text x="925" y="190" text-anchor="middle" class="sub">Campaigns</text>
+  <text x="925" y="218" text-anchor="middle" class="sub">Research briefs, drafts, reviews</text>
+
+  <path class="line" d="M240 230 L240 300"/>
+  <path class="line" d="M370 345 L470 345"/>
+
+  <path class="line" d="M610 210 L610 270"/>
+  <path class="line" d="M610 360 L610 430"/>
+  <path class="line" d="M750 475 L940 475"/>
+  <path class="line" d="M1220 670 L1290 660"/>
+  <path class="line" d="M1400 705 L1400 790"/>
+
+  <path class="loop" d="M950 670 L850 670 L850 560 L610 560 L610 520"/>
+  <text x="812" y="648" text-anchor="middle" class="label" fill="#dc2626">No: required changes</text>
+
+  <path class="line" d="M1080 750 L1080 790 L1260 790"/>
+  <text x="1175" y="774" text-anchor="middle" class="label">Yes</text>
+
+  <path class="line-soft" d="M750 160 L790 160"/>
+  <path class="line-soft" d="M750 315 L790 200"/>
+  <path class="line-soft" d="M750 475 L790 230"/>
+  <path class="line-soft" d="M940 430 L1010 240"/>
+  <text x="840" y="278" text-anchor="middle" class="small">Shared workflow state</text>
+
+  <text x="240" y="436" text-anchor="middle" class="label">Structured request</text>
+  <text x="845" y="474" text-anchor="middle" class="label">Draft for review</text>
+  <text x="1400" y="732" text-anchor="middle" class="label">Post-approval only</text>
+</svg>
